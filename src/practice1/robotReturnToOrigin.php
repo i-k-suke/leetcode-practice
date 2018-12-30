@@ -42,5 +42,8 @@ class RobotReturnToOrigin
     }
 }
 
-$result = (new RobotReturnToOrigin())->judgeCircle("LL");
+$result = (new RobotReturnToOrigin())->judgeCircle("LRRRLLUUDD");
+echo $result ? "True" : "False";
+
+$result = (new RobotReturnToOrigin())->judgeCircle("LRRRLLUUD");
 echo $result ? "True" : "False";
