@@ -45,48 +45,99 @@ Note:
 0 <= bills.length <= 10000
 bills[i] will be either 5, 10, or 20.
  */
-
 class LemonadeChange
 {
     const UNIT_PRICE = 5;
+    const BILL_5 = 5;
+    const BILL_10 = 10;
 
-    /**
-     * @var int
-     */
+    private $bills = [];
+
     private $sales = 0;
+    private $chasher = [];
 
     /**
-     * @param int[] $bills
-     * @return bool
+     * 
      */
-    public function sale(array $bills)
+    public function __construct()
     {
-        $result = true;
-        foreach($bills as $bill){
-            $change = $bill - self::UNIT_PRICE;
-            if($this->sales < $change){
-                $result = false;
-                break;
-            }
-            $this->sales += self::UNIT_PRICE;
+        $this->bills = [self::BILL_5, self::BILL_10];
+
+        foreach($this->bills as $bill){
+            $this->chasher[$bill] = 0;
         }
-        $this->output($result);
     }
 
     /**
-     * @param bool $result
+     * 
+     * @param int[] $payments
+     * @return bool
      */
-    private function output($result)
+    public function sale(array $payments)
     {
-        echo sprintf("%s \n", $result ? "true" : "false");
+        foreach($payments as $payment){
+            if(in_array($payment, $this->bills)){
+                $this->chasher[$payment]++;
+            }
+            
+            if(!$this->execChange($payment - self::UNIT_PRICE)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param int $change
+     * @return bool
+     */
+    private function execChange($change)
+    {
+        if($change == 0){
+            return true;
+        }
+
+        if($change >= self::BILL_10){
+            if($this->chasher[self::BILL_10] >= 1){
+                $this->chasher[self::BILL_10]--;
+                if($this->chasher[self::BILL_5] >= ($change - self::BILL_10)/self::BILL_5){
+                    $this->chasher[self::BILL_5] -= ($change - self::BILL_10)/self::BILL_5;
+                    return true;
+                }
+            }else if($this->chasher[self::BILL_5] >= ($change/self::BILL_5)){
+                $this->chasher[self::BILL_5] -= ($change/self::BILL_5);
+                return true;
+            }
+        }else if($this->chasher[self::BILL_5] >= ($change/self::BILL_5)){
+            $this->chasher[self::BILL_5] -= ($change/self::BILL_5);
+            return true;
+        }
+
+        return false;
     }
 }
 
-$inputBills = [5,5,5,10,20];
-(new LemonadeChange())->sale($inputBills);
+// exec
 
-$inputBills = [5,5,10];
-(new LemonadeChange())->sale($inputBills);
+$payments = [5,5,5,10,20];
+// expect: true
+$result = (new LemonadeChange())->sale($payments);
+var_dump($result);
 
-$inputBills = [10,10];
-(new LemonadeChange())->sale($inputBills);
+
+$payments = [10,10];
+// expect: false
+$result = (new LemonadeChange())->sale($payments);
+var_dump($result);
+
+
+$payments = [5,5,10,10,20];
+// expect: false
+$result = (new LemonadeChange())->sale($payments);
+var_dump($result);
+
+
+$payments = [5,5,10,20];
+// expect: true
+$result = (new LemonadeChange())->sale($payments);
+var_dump($result);
